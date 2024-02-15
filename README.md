@@ -19,21 +19,23 @@ The EEG cleaning pipeline consists of the following steps:
 
 4. **Noisy segments' detection**: portions of the signal are identified and marked as bad by the algorithm according to the following steps: i) band-pass filter between 60 - F_{Nyquist} - 1 Hz (Muscular activity typical range); ii) means across channels of the channels' envelopes, computed using the absolute value of the Hilbert-transformed signals; iii) definition of a threshold as the mean ± 10 * standard_deviation. A robust estimation of the mean's standard deviation is computed as 1.4826 multiplied by the median absolute deviation (MAD). iv) segments displaying values above this threshold are marked as bad.
 
-5. **Notch Filtering via Zapline**: Power line noise is removed with the Zapline algorithm [1]
+5. **Notch filtering via Zapline**: Power line noise is removed with the Zapline algorithm [1]
 
 6. **Robust referencing**: based on the process shown in the Prep pipeline [2]
 
 7. ** EOG regression**: two methods are implanted: i) the frontal channel with the best blink fitting is selected and subjected to singular value decomposition. EOG artifacts are removed using singular value decomposition (SVD) and ICLabel classifier [3] ii) linear regression
 
-8. **High pass filtering**: cutoff frequency 1Hz.
+8. **High pass filtering**: Butterworth, 5th order, cutoff frequency = 80 Hz, zero-phase
 
-9. **Clean raw data**: channel rejection using clean_rawata EEGLAB Plugin with the following parameters: 'ChannelCriterion', 'off', 'LineNoiseCriterion', 'off',         'BurstCriterion', 25, 'WindowCriterion', 0.25, 'Highpass', 'off' [4]
+9. **Clean raw data**: channel rejection using clean_rawata EEGLAB Plugin with the following parameters: 'ChannelCriterion', 'off', 'LineNoiseCriterion', 'off', 'BurstCriterion', 25, 'WindowCriterion', 0.25, 'Highpass', 'off' [4]
 
-10.  **Artifacts removal via ICA**: IC are visually identified by the user in terms of time series, topoplot, and power spectrum (similarly to step 7). An automatic classification is provided to help the user in the process based on ICLabel classifier[3].
+10.  **Artifacts removal via ICA**: ICs are visually identified by the user in terms of time series, topoplot, and power spectrum (similarly to step 7). An automatic classification is provided to help the user in the process based on the ICLabel classifier[3].
 
 11. **Bad channels interpolation via cubic spline**
 
-12. **Data Export**: Cleaned EEG data is exported for further analysis.
+12. **Low pass filtering**: Butterworth, 5th order, cutoff frequency = 80 Hz, zero-phase
+
+13. **Data Export**: Cleaned EEG data is exported for further analysis. If specified in the DefaultParameters.m file, an additional table EEGsteps is saved with EEG data after each implemented cleaning step. Moreover, plots comparing raw and cleaned EEG are obtained.
 
 
 
