@@ -12,21 +12,22 @@ nfi = 1;
 
 for iFile = 1:nfi
 
-    %Exclude TENS
+    %Exclude TENS artifact if present (used for synhcronization purposes)
     try
         d = 2*EEG.srate;
         ind_tens = find(ismember({EEG.event.type}, 'TENStrigger'));
         assert(length(ind_tens) == 2, 'need to have exactly two TENS triggers')
-        %         ind_tens = ind_tens + [1 -1]; %one event after and before TENS
         EEG = pop_select(EEG, 'point', [EEG.event(ind_tens).latency] + [d -3*d]);
     catch
         warning('No TENS detected.')
     end
 
+
     EEG.badchan = false(1,EEG.nbchan);
     EEG.bad_segment = false(1,EEG.pnts*EEG.trials);
     EEG.bad_epoch = [];
-
+    
+    % Select only EEG channels
     iChannels =  find(strcmp({EEG.chanlocs.type},'EEG'));
     excludeChannels = [setdiff(1:EEG.nbchan,iChannels)];
 
@@ -42,10 +43,6 @@ end
 
 % Start cleaning pipeline
 fprintf('Start cleaning pipeline...')
-% [EEGmerged, EEGsteps] = RunCleaningPipeline(EEGmerged, ECG, 'EpochingParams',EpochingParams,'DetrendParams',DetrendParams,... %*
-%     'FilterParams',FilterParams,'EOGParams',EOGParams,'ECGParams', ECGParams,'PrepParams',PrepParams,'CRDParams',CRDParams,...
-%     'FastICAParams',FastICAParams,'prunedata',prunedata,'performICA',performICA,...
-%     'subcompICA',subcompICA,'interpbadchannels',interpbadchannels,'save_fig',save_fig,'save_steps',save_steps);
 
 [EEGmerged, EEGsteps] = RunCleaningPipeline(EEGmerged, ECG);
 

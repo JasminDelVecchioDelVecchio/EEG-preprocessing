@@ -1,4 +1,6 @@
 function [EEG,referenceOut] = performReference(EEG,params)
+% Inputs:
+%   - EEG is an EEGLAB data structure with EEG data
 
 toRemove = find(EEG.badchan);
 remove_range = [];%EEG.remove_range;
@@ -6,7 +8,9 @@ remove_range = [];%EEG.remove_range;
 oldremovedMask = EEG.badchan;
 removedMask = EEG.badchan;
 fprintf('Performing robust rereferencing...\n');
-[EEGCleaned,referenceOut] = Reference(EEG, params, remove_range);
+% [EEGCleaned,referenceOut] = Reference(EEG, params, remove_range);
+[EEGCleaned,referenceOut] = Reference(EEGCleaned, params, remove_range);
+
 if(isfield(referenceOut, 'noisyStatistics'))
     noisechan = referenceOut.noisyStatistics;
     if(isfield(noisechan, 'noisyChannels'))
