@@ -9,7 +9,7 @@ Parallel Computing, EEGLAB, Brainstorm, NoiseTools, PrepPipeline, clean_rawdata.
 
 ## Overview
 
-The EEG cleaning pipeline consists of the following steps:
+This EEG cleaning pipeline is based on [1]. It consists of the following steps:
 
 1. **Data Loading**: Raw EEG data is loaded into the pipeline.
 
@@ -44,11 +44,12 @@ The EEG cleaning pipeline consists of the following steps:
 Follow the instructions in the provided scripts to run each pipeline step. Make sure to configure input and output paths as needed.
 
 ## References
-[1] Alain de Cheveigné, "ZapLine: A simple and effective method to remove power line artifacts", NeuroImage, Volume 207, 15 February 2020, 116356, https://doi.org/10.1016/j.neuroimage.2019.116356
-[2] Nima Bigdely-Shamlo, Tim Mullen, Christian Kothe, Kyung-Min Su, and Kay A. Robbins, "The PREP pipeline: standardized preprocessing for large-scale EEG analysis", Frontiers in Neuroinformatics, 2015, 9, pp:16, DOI=10.3389/fninf.2015.00016 
-[3] Luca Pion-Tonachini, Ken Kreutz-Delgado, Scott Makeig, "ICLabel: An automated electroencephalographic independent component classifier, dataset, and website", NeuroImage
+[1] Pedroni, A., Bahreini, A., & Langer, N. (2019). Automagic: Standardized preprocessing of big EEG data. Neuroimage. doi: 10.1016/j.neuroimage.2019.06.046
+[2] Alain de Cheveigné, "ZapLine: A simple and effective method to remove power line artifacts", NeuroImage, Volume 207, 15 February 2020, 116356, https://doi.org/10.1016/j.neuroimage.2019.116356
+[3] Nima Bigdely-Shamlo, Tim Mullen, Christian Kothe, Kyung-Min Su, and Kay A. Robbins, "The PREP pipeline: standardized preprocessing for large-scale EEG analysis", Frontiers in Neuroinformatics, 2015, 9, pp:16, DOI=10.3389/fninf.2015.00016 
+[4] Luca Pion-Tonachini, Ken Kreutz-Delgado, Scott Makeig, "ICLabel: An automated electroencephalographic independent component classifier, dataset, and website", NeuroImage
 Volume 198, September 2019, Pages 181-197, https://doi.org/10.1016/j.neuroimage.2019.05.026
-[4] Kothe, Miyakoshi, Delorme, C. M. A. (2019). clean_rawdata (Version 2.7) [Computer software]
+[5] Kothe, Miyakoshi, Delorme, C. M. A. (2019). clean_rawdata (Version 2.7) [Computer software]
 
 
 ## Contributors
