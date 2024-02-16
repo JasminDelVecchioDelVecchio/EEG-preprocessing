@@ -55,7 +55,7 @@ Follow the instructions in the provided scripts to run each pipeline step. Confi
 
 ## Contributors
 
-- Jasmin Del Vecchio
+- Jasmin Del Vecchio Del Vecchio
 - Andrea Canessa
 - Chiara Palmisano
 - Franziska Pellegrini
