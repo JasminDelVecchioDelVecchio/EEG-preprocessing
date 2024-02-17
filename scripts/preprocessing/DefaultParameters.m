@@ -24,8 +24,6 @@ classdef DefaultParameters
     % along with this program.  If not, see <http://www.gnu.org/licenses/>.
     properties(Constant)
 
-        ResampleParams = struct('freq',[],'factor',2);
-
         FilterParams = struct('notch',    struct('freq', 50),...
             'high',     struct('freq', [0.25 1]),...
             'low',      struct('freq', [80 85]))
@@ -36,7 +34,7 @@ classdef DefaultParameters
 
         PrepParams = struct('highFrequencyNoiseThreshold',   5,...
             'correlationThreshold',       0.4,...
-            'detrendType' , 'none'); % Not needed because highpass is already implemented as first filtering step (see "FilterParams")
+            'detrendType' , 'none'); % Not needed because highpass is already implemented (see "FilterParams")
 
         CRDParams = struct('ChannelCriterion',     'off',...%already implemented in robustReference step
             'LineNoiseCriterion',   'off',...%already implemented in robustReference step

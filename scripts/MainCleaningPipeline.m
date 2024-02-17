@@ -1,12 +1,23 @@
 
-function [EEGCleaned, EEGsteps] = MainCleaningPipeline(EEG,subj_name)
+function [EEGCleaned, EEGsteps] = MainCleaningPipeline(EEG, ID, pathRes)
 
 %Input:
 % - EEG: data to be cleaned in eeglab struct format
+% - subj_name: string with subject's name 
+% - pathRes: path to results' folder 
 
 addCleaningPipelinePaths();
 
 DefParam = DefaultParameters;
+
+if nargin < 3
+    pathRes = uigetdir(currentDir, 'Select folder to store results');
+end
+
+if nargin < 2
+    ID = input('Please enter subject-ID: ', 's');
+    pathRes = uigetdir(currentDir, 'Select folder to store results');
+end
 
 nfi = 1;
 
@@ -66,7 +77,7 @@ end
 
 if DefParam.save_fig == 1
     % Parameters
-    load("cm17.mat") % Low custom colormaps
+    load("cm17.mat") % custom colormaps
     frqs = 1:EEG.srate/2; % frequency range [1:F_Nyquist]
     bands = {[3 8], [8 12], [13 35],[35 80]}; % EEG bands of interest 
     bandnames = {'theta', 'alpha', 'beta','gamma'}; 
@@ -79,99 +90,80 @@ if DefParam.save_fig == 1
     
     % select only EEG channels for plotting - Cleaned data
     iChannels =  find(strcmp({EEGCleaned.chanlocs.type},'EEG')); 
+    EEGplotcleaned = EEGCleaned;
     EEGplotcleaned.data = EEGCleaned.data(iChannels,:);
     EEGplotcleaned.chanlocs = EEGCleaned.chanlocs(1,iChannels);
     EEGplotcleaned.nbchan = length(iChannels);
     
-    % PSDs (via pwelch)
-    PSD_raw = pwelch(EEGplot.data', EEG.srate, EEG.srate/2, 1:EEG.srate/2, EEG.srate);
-    PSD_cleaned = pwelch(EEGplotcleaned.data', EEG.srate, EEG.srate/2, 1:EEG.srate/2, EEG.srate);
-    
-    % Get psds averages over channels
-    PSD_raw_mean = mean(PSD_raw,2,'omitnan');
-    PSD_cleaned_mean = mean(PSD_cleaned,2,'omitnan');
+    h = figure; pop_spectopo(EEGplot, 1, [0 EEGplot.xmax*1000], 'EEG' , 'percent', 100, 'freq', [10 20], ...
+        'freqrange',[0 EEGplot.srate./2],'electrodes','on');
+    title('Raw EEG','Position',[-42 48 1]);
+    set(h,'windowstate','maximized');
+    exportgraphics(h,[pathRes,ID,'_raw_spectra.png'],"Resolution",300)
+    savefig([pathRes,ID,'raw_spectra']);
+    close all;
 
-    % get standard error of the mean
-    PSD_raw_sem = std(PSD_raw, [], 2,'omitnan')./sqrt(size(PSD_raw,2));
-    PSD_cleaned_sem = std(PSD_cleaned, [], 2,'omitnan')./sqrt(size(PSD_cleaned,2));
+    h = figure; pop_spectopo(EEGplotcleaned, 1, [0 EEGplotcleaned.xmax*1000], 'EEG' , 'percent', 100, 'freq', [10 20], ...
+        'freqrange',[0 EEGplot.srate/2], 'electrodes','on');
+    title('Cleaned EEG', 'Position', [-42 48 1]);
+    exportgraphics(h, [pathRes, ID, '_cleaned_spectra.png'], "Resolution", 300)
+    savefig([pathRes,ID,'cleaned_spectra']);
+    close all;
 
-    % Calculate t-score for a 95% confidence interval
-    t_score = tinv(.95, length(PSD_raw_mean)-1); % 6 degrees of freedom for 95% confidence
-
-    % Plotting PSDs (mean +- sem)
-    h = figure();
-    % Plot raw PSD
-    plot(frqs, PSD_raw_mean,'LineWidth',2.5,'Color', [1, .6, 0], 'DisplayName','Raw - MEAN PSD');
-    hold on; grid on;
-    upper_bound_raw = PSD_raw_mean(:) + t_score * PSD_raw_sem(:);
-    lower_bound_raw = PSD_raw_mean(:) - t_score * PSD_raw_sem(:);
-    patch([frqs(:); flipud(frqs(:))], [upper_bound_raw; flipud(lower_bound_raw)], [1, .6, 0], ...
-        'FaceAlpha', 0.4, 'EdgeColor', 'none', 'DisplayName', 'MEAN ± SEM');
-
-    % Plot cleaned PSDs
-    plot(frqs, PSD_cleaned_mean,'LineWidth',2.5,'Color', 'b', 'DisplayName','Cleaned - MEAN PSD');
-    upper_bound_cleaned = PSD_cleaned_mean(:) + t_score * PSD_cleaned_sem(:);
-    lower_bound_cleaned = PSD_cleaned_mean(:) - t_score * PSD_cleaned_sem(:);
-    patch([frqs(:); flipud(frqs(:))], [upper_bound_cleaned; flipud(lower_bound_cleaned)], 'b', ...
-        'FaceAlpha', 0.4, 'EdgeColor', 'none', 'DisplayName', 'MEAN ± SEM');
-    xlim([1 125]),xlabel('Frequency [Hz]'); ylabel('PSD [au]');
-    
-    set(gca,'FontSize',22,'YScale','log');
-    legend('show','interpreter','none');
-    title('Averaged PSDs comparison before (raw) and after (cleaned) cleaning','FontSize',24);
-    set(h,'WindowState','fullscreen');
-    
-    currentDir = pwd;
-    matchingDir = dir(fullfile(currentDir, '**', ['*' 'CleaningPipeline\data_cleaned\plots\' '*']));
-    plotsDir = matchingDir.folder; 
-
-    exportgraphics(h,[plotsDir,subj_name,'_PSDs_rawcleaned.png'],"Resolution",300)
-    savefig([plotsDir,subj_name,'_PSDs_rawcleaned'])
-
-    % Topoplots for each cleaning step implemented
-    % Cleaning steps are stored in EEGsteps table
+    % Topoplot after each cleaning step
     prepro_steps = EEGsteps.Properties.VariableNames; % cell array containing preprocessing implemented steps
     
-    sum_pow = [];
+    sum_pow = []; psd = [];
     for istep = 1:length(prepro_steps)
         if iscell(EEGsteps.(istep))
-            eeg = EEGsteps.(istep){1,1}; 
+            eeg = EEGsteps.(istep){1,1};
         else
             eeg = EEGsteps.(istep);
         end
-        psd(:, :, istep) = pwelch(eeg.data',eeg.srate,eeg.srate/2,1:eeg.srate,eeg.srate);
+        psd(:, :, istep) = pwelch(eeg.data', eeg.srate, eeg.srate/2, 1:eeg.srate/2, eeg.srate);
         for ib = 1:length(bands)
             frq_inds = frqs >= bands{ib}(1) & frqs <= bands{ib}(2);
-            sum_pow(ib, :, istep) = squeeze(sum(psd(frq_inds, :, :),1,'omitmissing'));
+            sum_pow(ib, :, istep) = squeeze(sum(psd(frq_inds, :, istep),1,'omitmissing'));
         end
     end
+    
+% Calculate the total power across all bands for each cleaning step
+total_power = sum(sum_pow, 1);
 
+% Calculate the relative power in each band for each cleaning step
+relative_power = sum_pow ./ total_power;
 
-    % Power in frequency bands
-    sum_pow_raw = []; sum_pow_cleaned = [];
-    for ib = 1:length(bands)
-        frq_inds = frqs >= bands{ib}(1) & frqs <= bands{ib}(2);
-        sum_pow_raw(ib, :) = squeeze(sum(PSD_raw(frq_inds, :),1,'omitmissing'));
-        sum_pow_cleaned(ib, :) = squeeze(sum(PSD_cleaned(frq_inds, :),1,'omitmissing'));
+idx = 1;
+h = figure;
+for istep = 1:size(relative_power, 3)
+    for ib = 1:size(relative_power, 1)
+        ax = subplot(7, 4, idx);
+        power2plot = relative_power(ib, ~eeg.badchan, istep);
+        topoplot(power2plot, eeg.chanlocs(~eeg.badchan));
+        colormap(cm17), colorbar;
+        %Using the 10th and 90th percentiles to set the color limits (clim) 
+        % offers a good balance between including most of the data range while 
+        % minimizing the influence of outliers.
+        cmax = max(quantile(power2plot, 0.9));
+        cmin = min(quantile(power2plot, 0.1));
+        clim([cmin cmax]);
+        % Add row title
+        if ib == 1
+            text(-2.8, 0.13, prepro_steps{istep}, 'FontSize', 18, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'middle');
+        end
+
+        % Add column title
+        if istep == 1
+            title(bandnames{ib}); % Use ib for column titles
+        end
+        set(ax, 'FontSize', 18);
+        idx = idx + 1;
     end
-
-    figure;
-    fig_idx = 1;
-    for ib = 1:length(bands)
-        subplot(4,4,fig_idx);
-        topoplot(zscore(sum_power_raw(ib,:)),EEG.chanlocs);
-        colormap(cm17);
-        colorbar
-        fig_idx = fig_idx + 1;
-    end
-    for ib = 1:length(bands)
-        subplot(4,4,fig_idx);
-        topoplot(zscore(sum_power_cleaned(ib,:)),EEG.chanlocs);
-        colormap(cm17);
-        colorbar
-        fig_idx = fig_idx + 1;
-    end
-
+end
+set(h,'WindowState','Maximized');
+exportgraphics(h,[pathRes,ID,'_topoplots.png'],"Resolution",300)
+savefig([pathRes,ID,'topoplots']);
+close all;
 end
 
 if DefParam.save_steps == 0

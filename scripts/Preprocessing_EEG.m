@@ -10,25 +10,23 @@ else
     disp('Brainstorm is not installed or not available');
 end
 
-% Set data directory
-datadir = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\EEG-preprocessing\data\';
+% Specify required paths
+pathData = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\EEG-preprocessing\data\';
+pathRes = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\EEG-preprocessing\data\plots\';
 
 % Load data
-subj_name = 'SR72';
+subject_ID = 'CR78';
 fprintf("Loading data...\n")
-fprintf(subj_name)
-[EEG,events] = loadDataFromBrainstorm(subj_name);
+fprintf(subject_ID)
+[EEG,events] = loadDataFromBrainstorm(subject_ID);
 
 % Preprocessing EEG data
-% EEGCleaned is an EEGLAB struct containing cleaned EEG + remaining
-% recorded signals not preprocessed (e.g. LFPs, EMGs, etc.)
-[EEGCleaned, EEG_steps] = MainCleaningPipeline(EEG,subj_name);
+[EEGCleaned, EEG_steps] = MainCleaningPipeline(EEG,subject_ID,pathRes);
 
-
-iChannels = find(strcmp({EEGCleaned.chanlocs.type},'EEG'));
-iChannels_LFP = find(strcmp({EEGCleaned.chanlocs.type}, 'STN'));
-iChannels_KIN = find(strcmp({EEG.chanlocs.type}, 'MISC'));
-iChannel_ECG = find(strcmp({EEGCleaned.chanlocs.type}, 'ECG'));
+iChannels = find(strcmp({EEGCleaned.chanlocs.type},'EEG')); % EEG channels
+iChannels_LFP = find(strcmp({EEGCleaned.chanlocs.type}, 'STN')); % LFPs channels
+iChannels_KIN = find(strcmp({EEG.chanlocs.type}, 'MISC')); % kinematic data channels
+iChannel_ECG = find(strcmp({EEGCleaned.chanlocs.type}, 'ECG')); % ECG channel
 
 % Remove LFP-ECG artifact
 ECG = EEGCleaned.data(iChannel_ECG,:);
@@ -103,12 +101,12 @@ end
 % end
 
 EEGCleaned.data = data_cleaned;
-save([subj_name,'_data_rest_off.mat'],'EEGCleaned','EEG','EEG_steps');
+save([subject_ID,'_data_rest_off.mat'],'EEGCleaned','EEG','EEG_steps');
 
 
-subj_name = 'CR78';
-datadir = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\data_cleaned\fig';
-power_analysis(EEG, EEGCleaned, subj_name, datadir)
+subject_ID = 'CR78';
+pathData = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\data_cleaned\fig';
+power_analysis(EEG, EEGCleaned, subject_ID, pathData)
 
 
 % 
@@ -441,6 +439,6 @@ saveas(gca,'cleanedEEG_psd.jpg')
 close all;
 
 %save plot
-saveas(psdfig, ['C:\Users\jasmi\OneDrive\Desktop\EEG_analysis\Preprocessing\psd_', subj_name, '.png'])
-saveas(powfig, ['C:\Users\jasmi\OneDrive\Desktop\EEG_analysis\Preprocessing\pow_topo_', subj_name, '.png'])
+saveas(psdfig, ['C:\Users\jasmi\OneDrive\Desktop\EEG_analysis\Preprocessing\psd_', subject_ID, '.png'])
+saveas(powfig, ['C:\Users\jasmi\OneDrive\Desktop\EEG_analysis\Preprocessing\pow_topo_', subject_ID, '.png'])
 

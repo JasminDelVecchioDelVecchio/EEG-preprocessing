@@ -3,7 +3,7 @@ function [EEG,referenceOut] = performReference(EEG,params)
 %   - EEG is an EEGLAB data structure with EEG data
 
 toRemove = find(EEG.badchan);
-remove_range = [];%EEG.remove_range;
+remove_range = [];
 [~,EEGCleaned] = evalc('pop_select(EEG,''nochannel'',toRemove)');
 oldremovedMask = EEG.badchan;
 removedMask = EEG.badchan;
@@ -16,14 +16,14 @@ if(isfield(referenceOut, 'noisyStatistics'))
     if(isfield(noisechan, 'noisyChannels'))
         newmask = false(1,EEGCleaned.nbchan);
         newmask(noisechan.noisyChannels.all) = true;
-        % removedMask(~removedMask) = newmask; 
-        removedMask(~removedMask) = newmask(~removedMask); 
+        removedMask(~removedMask) = newmask; 
+        % removedMask(~removedMask) = newmask(~removedMask); 
     end
 end
 
 EEG.badchan = removedMask;
-EEG.data(~oldremovedMask,:) = EEGCleaned.data(~oldremovedMask,:);
-% EEG.data(~oldremovedMask,:) = EEGCleaned.data;
+% EEG.data(~oldremovedMask,:) = EEGCleaned.data(~oldremovedMask,:);
+EEG.data(~oldremovedMask,:) = EEGCleaned.data;
 
 clear EEGCleaned;
 

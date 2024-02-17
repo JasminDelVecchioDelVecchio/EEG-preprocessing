@@ -16,11 +16,13 @@ nkeep = [];
 
 if ~isempty(dsskeep)
     textbar = textprogressbar(sprintf('\tzapline : '));
-    [data_cleaned,artefact,score,dsskeep,todss] = eval('nt_zapline(EEGCleaned.data(:,:),EEGCleaned.srate,double(fline.freq),nfft,nkeep,dsskeep,0,textbar,~bad_segments'')');
+    [data_cleaned,artefact,score,dsskeep,todss] = eval(['nt_zapline(EEGCleaned.data(:,:), EEGCleaned.srate, ' ...
+        'double(fline.freq), nfft, nkeep, dsskeep, 0, textbar, ~bad_segments'')']);
     textbar.endprogressbar('done');
 else
     textbar = textprogressbar(sprintf('\tzapline : '));
-    [plt]  = eval('ZaplinePlotter(EEGCleaned.data(:,:),EEGCleaned.srate,fline,nfft,dsskeep,nkeep,textbar,~bad_segments'')');
+    [plt]  = eval(['ZaplinePlotter(EEGCleaned.data(:,:), EEGCleaned.srate, fline, nfft, dsskeep,' ...
+        'nkeep,textbar, ~bad_segments'')']);
     % waitfor(gcf)
     data_cleaned = plt.data_cleaned;
 

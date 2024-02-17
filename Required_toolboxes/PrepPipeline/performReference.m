@@ -2,7 +2,7 @@ function [EEG,referenceOut] = performReference(EEG,params)
 
 toRemove = find(EEG.badchan);
 remove_range = EEG.remove_range;
-
+% Bad channel are removed before performing the reference
 EEGCleaned = pop_select(EEG,'nochannel',toRemove);
 oldremovedMask = EEG.badchan;
 removedMask = EEG.badchan;
