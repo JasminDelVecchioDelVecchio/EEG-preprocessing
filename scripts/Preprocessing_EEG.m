@@ -15,7 +15,7 @@ pathData = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_p
 pathRes = 'C:\Users\jasmi\Lab Isaias Dropbox\Team\WUMIGE_shared\WUMIGE_shared_projects\Dystonia_jdvdv\EEG_analysis\CleaningPipeline\EEG-preprocessing\data\plots\';
 
 % Load data
-subject_ID = 'CR78';
+subject_ID = 'P01';
 fprintf("Loading data...\n")
 fprintf(subject_ID)
 [EEG,events] = loadDataFromBrainstorm(subject_ID);
